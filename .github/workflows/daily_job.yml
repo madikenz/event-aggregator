@@ -1,0 +1,59 @@
+
+name: Daily Event Aggregation
+
+on:
+  schedule:
+    - cron: '0 10 * * *' # Run daily at 10:00 UTC
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install jinja2 cerebras_cloud_sdk
+
+    - name: Run Scrapers
+      env:
+        DATABASE_URL: sqlite:///data/events.db
+      run: |
+        mkdir -p data
+        # We need to ensure DB exists or is created
+        python -c "from database import models; models.create_tables()"
+        # Run Scrapers (this takes time so we might limit it or run parallel)
+        python scrape.py
+
+    - name: Run AI Search (Tavily + Cerebras)
+      env:
+        TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+        CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+        DATABASE_URL: sqlite:///data/events.db
+      run: |
+        python search_events.py
+
+    - name: Generate Static Site
+      env:
+        DATABASE_URL: sqlite:///data/events.db
+      run: |
+        python generate_static.py
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./public
