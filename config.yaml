@@ -1,0 +1,113 @@
+app:
+  name: "Boston Events Aggregator"
+  debug: false
+  timezone: "America/New_York"
+
+database:
+  url: "${DATABASE_URL:-sqlite:///data/events.db}"
+
+sources:
+  - name: "Luma Boston"
+    url: "https://luma.com/boston"
+    parser: "luma"
+    enabled: true
+    requires_js: true
+
+  - name: "Eventbrite Boston"
+    url: "https://www.eventbrite.com/d/ma--boston/all-events/"
+    parser: "eventbrite"
+    enabled: true
+    requires_js: true
+
+  - name: "Meetup Boston"
+    url: "https://www.meetup.com/find/?location=us--ma--boston"
+    parser: "meetup"
+    enabled: true
+    requires_js: true
+
+  - name: "VentureFizz"
+    url: "https://venturefizz.com/events/"
+    parser: "venturefizz"
+    enabled: true
+    requires_js: false
+
+  - name: "StartupBos"
+    url: "https://www.startupbos.org/directory/events"
+    parser: "startupbos"
+    enabled: true
+    requires_js: false
+
+  - name: "HBS Alumni Boston"
+    url: "https://www.hbsab.org/s/1738/cc/21/page.aspx?sid=1738&gid=8&pgid=13&cid=664"
+    parser: "hbsab"
+    enabled: true
+    requires_js: false
+
+  - name: "MIT Entrepreneurship"
+    url: "https://entrepreneurship.mit.edu/events-calendar/"
+    parser: "mit_entrepreneurship"
+    enabled: true
+    requires_js: false
+
+  - name: "MIT Sloan Groups"
+    url: "https://sloangroups.mit.edu/events"
+    parser: "mit_sloan"
+    enabled: true
+    requires_js: false
+
+  - name: "Harvard Innovation Labs"
+    url: "https://innovationlabs.harvard.edu/events/upcoming"
+    parser: "harvard_ilab"
+    enabled: true
+    requires_js: true
+
+  - name: "MIT HST"
+    url: "https://hst.mit.edu/news-events/twihst/volume-27-number-12"
+    parser: "mit_hst"
+    enabled: true
+    requires_js: false
+
+  - name: "Mass Founders Network"
+    url: "https://massfoundersnetwork.org/events/"
+    parser: "massfounders"
+    enabled: true
+    requires_js: false
+
+  - name: "Northeastern Alumni"
+    url: "https://alumni.northeastern.edu/events/"
+    parser: "northeastern"
+    enabled: true
+    requires_js: false
+
+  - name: "Boston Chamber"
+    url: "https://bostonchamber.com/event/calendar/"
+    parser: "boston_chamber"
+    enabled: true
+    requires_js: false
+
+  - name: "LabCentral"
+    url: "https://www.labcentral.org/events-and-media/events"
+    parser: "labcentral"
+    enabled: true
+    requires_js: false
+
+  - name: "The Venture Lane"
+    url: "https://theventurelane.com/programs-events/"
+    parser: "venturelane"
+    enabled: true
+    requires_js: false
+
+telegram:
+  bot_token: "${TELEGRAM_BOT_TOKEN}"
+  daily_digest_time: "09:00"
+  admin_chat_id: "${TELEGRAM_ADMIN_CHAT_ID}"
+
+rss:
+  title: "Boston Events Aggregator"
+  description: "Tech, startup, and networking events in Boston/MA"
+  link: "https://your-domain.com"
+  max_items: 100
+
+scheduler:
+  scrape_interval_hours: 6
+  cleanup_days: 90
