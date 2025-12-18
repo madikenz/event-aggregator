@@ -36,7 +36,7 @@ jobs:
       run: |
         mkdir -p data
         # We need to ensure DB exists or is created
-        python -c "from database import models; models.create_tables()"
+        python -c "from database import models; models.init_db()"
         # Run Scrapers (this takes time so we might limit it or run parallel)
         python scrape.py
 
