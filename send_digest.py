@@ -197,7 +197,7 @@ def generate_digest():
             message += f"   📅 {date_str} | {event.source}\n"
             message += f"   🔗 [Link]({event.url})\n\n"
         
-        message += "👇 *See all events:* https://madikenz.github.io/event-aggregator/"
+        message += "[​​​​​​​​​​​](https://raw.githubusercontent.com/madikenz/event-aggregator/main/logo/NESEN-LOGO.png)👇 *See all events:* https://madikenz.github.io/event-aggregator/"
         
         return message
         
