@@ -88,7 +88,7 @@ def curate_events_with_cerebras(events):
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            model="qwen-2.5-32b",
+            model="llama3.1-8b",
             response_format={"type": "json_object"}
         )
         

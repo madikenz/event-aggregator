@@ -45,14 +45,14 @@ def generate_dynamic_queries() -> List[str]:
     queries = [
         f"upcoming startup events in Boston {current_month} {current_year}",
         f"upcoming startup events in Boston {next_month} {next_year_val}",
-        f"upcoming tech conferences Boston {current_year}",
-        f"Boston hackathons {current_year}",
+        f"tech conferences Boston {current_month} {current_year}",
+        f"Boston hackathons {current_month} {current_year}",
         f"entrepreneur networking events Boston {current_month} {current_year}",
-        f"MIT innovation events {current_year} open to public",
-        f"Harvard biotech startup events {current_year}",
-        f"Boston science entrepreneurship events {current_year}",
-        f"TEDx events Boston {current_year}",
-        f"Climate tech startup events Boston {current_year}",
+        f"MIT innovation events {current_month} {current_year} open to public",
+        f"Harvard biotech startup events {next_month} {next_year_val}",
+        f"Boston science entrepreneurship events {current_month} {current_year}",
+        f"upcoming TEDx events Boston {current_month} {current_year}",
+        f"Climate tech startup events Boston {next_month} {next_year_val}",
         f"AI startup events Boston {current_month} {current_year}"
     ]
     return queries
@@ -77,7 +77,7 @@ def search_events_tavily(query: str) -> List[Dict[str, Any]]:
 
 def extract_events_with_cerebras(search_results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
-    Use Cerebras (qwen-2.5-32b) to extract structured event data from search results.
+    Use Cerebras (llama3.1-70b) to extract structured event data from search results.
     """
     events = []
     
@@ -121,7 +121,7 @@ def extract_events_with_cerebras(search_results: List[Dict[str, Any]]) -> List[D
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            model="qwen-2.5-32b",
+            model="llama3.1-8b",
             response_format={"type": "json_object"}
         )
         
