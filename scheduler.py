@@ -16,6 +16,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def run_sync_job():
+    """Syncs data to NocoDB."""
+    logger.info("Starting NocoDB sync...")
+    try:
+        subprocess.run(["python", "sync_nocodb.py"], check=True)
+        logger.info("NocoDB sync finished.")
+    except Exception as e:
+        logger.error(f"NocoDB sync failed: {e}")
+
 def run_scrape_job():
     """Runs the main scraper."""
     logger.info("Starting scheduled scraper...")
@@ -24,6 +33,7 @@ def run_scrape_job():
         # Using subprocess is safer for long running processes.
         subprocess.run(["python", "scrape.py"], check=True)
         logger.info("Scraper finished.")
+        run_sync_job() # Sync after scraping
     except Exception as e:
         logger.error(f"Scraper job failed: {e}")
 
@@ -33,6 +43,7 @@ def run_search_job():
     try:
         subprocess.run(["python", "search_events.py"], check=True)
         logger.info("Search job finished.")
+        run_sync_job() # Sync after search
     except Exception as e:
         logger.error(f"Search job failed: {e}")
 
