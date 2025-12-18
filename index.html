@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boston Tech Events</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-primary: #38bdf8;
+            /* Sky Blue */
+            --accent-secondary: #818cf8;
+            /* Indigo */
+            --gradient-bg: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--gradient-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        header {
+            padding: 1.5rem 1rem;
+            text-align: center;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.25rem;
+        }
+
+        p.subtitle {
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            font-size: 0.9rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 1rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .rss-link {
+            text-decoration: none;
+            color: var(--accent-primary);
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--accent-primary);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .rss-link:hover {
+            background: rgba(56, 189, 248, 0.1);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .date-badge {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--accent-primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            align-self: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .card h2 a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .card h2 a:hover {
+            color: var(--accent-primary);
+        }
+
+        .meta {
+            margin-top: auto;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .source-tag {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .location {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .source-chip {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: inline-block;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .filters select {
+            background: var(--bg-color);
+            color: var(--text-primary);
+            border: 1px solid var(--accent-primary);
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <img src="/logo/NESEN-LOGO.png" alt="NESEN Logo"
+            style="height: 100px; margin-bottom: 1rem; border-radius: 10px;">
+        <h1>Boston Events Aggregator</h1>
+        <div
+            style="font-size: 0.9rem; color: var(--text-secondary); opacity: 0.9; margin-bottom: 0.5rem; line-height: 1.4;">
+            by NESEN<br>
+            <span style="font-size: 0.8rem; font-weight: 300; opacity: 0.8;">New England Science and Entrepreneurship
+                Club</span>
+        </div>
+        <p class="subtitle">Curated startup, tech, and networking events in the Greater Boston area.</p>
+    </header>
+
+    <div class="container">
+        <!-- Sources Section -->
+        <div
+            style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+            <h3 style="margin-bottom: 0.75rem; color: var(--text-primary); font-size: 1rem;">Filter by Active Sources
+            </h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                <span class="source-chip active" onclick="setSourceFilter('all', this)" id="chip-all">All Sources <span
+                        style="opacity: 0.6; font-size: 0.8em; margin-left: 4px;">(24)</span></span>
+                
+                <span class="source-chip" onclick="setSourceFilter('Tavily Search', this)">
+                    Tavily Search <span style="opacity: 0.6; font-size: 0.8em; margin-left: 4px;">(24)</span>
+                </span>
+                
+            </div>
+        </div>
+
+        <!-- Controls & Filters -->
+        <div class="controls">
+            <div class="filters">
+                <!-- Hidden source filter, controlled by chips -->
+                <select id="sourceFilter" onchange="filterEvents()" style="display: none;">
+                    <option value="all">All Sources</option>
+                    
+                    <option value="Tavily Search">Tavily Search</option>
+                    
+                </select>
+
+                <select id="dateFilter" onchange="filterEvents()">
+                    <option value="all">All Dates</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                </select>
+
+                <select id="typeFilter" onchange="filterEvents()">
+                    <option value="all">All Types</option>
+                    <option value="in-person">In Person</option>
+                    <option value="online">Online</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid" id="eventsGrid">
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.389353"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.linkedin.com/posts/kyran-ai_startups-entrepreneurship-innovation-activity-7341208088395288579-nO5l" target="_blank">TechCrunch All Stage 2025: A Fresh, Innovative Experience for ...</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Boston
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.393074"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://techcrunch.com/events/techcrunch-all-stage-2025/side-events/" target="_blank">Side Events - All Stage 2025</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Boston
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.393703"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.eventbrite.com/e/the-technology-national-security-conference-2025-tickets-1059716854639" target="_blank">The Technology & National Security Conference 2025</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 undetermined
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.394286"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.eventbrite.com/o/boston-new-technology-48348536143" target="_blank">Boston New Technology Events and Tickets</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 undetermined
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.397780"
+                data-type="online">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://raise.mit.edu/events/global-ai-hackathon-2025/" target="_blank">Global AI Hackathon 2025</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        🌐 Online
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.398348"
+                data-type="online">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.eventbrite.com/d/ma--boston/hackathon/" target="_blank">Discover Hackathon Events & Activities in Boston, MA</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        🌐 Online
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.400013"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://calendar.mit.edu/event/cross-university-student-innovators-mixer" target="_blank">Cross-University Student Innovators Mixer - Events Calendar</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 MIT Innovation Headq...
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.400574"
+                data-type="online">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://professional.mit.edu/events" target="_blank">MIT Data Center Day</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        🌐 Online
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.403275"
+                data-type="online">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.eventbrite.com/b/ma--boston/science-and-tech/" target="_blank">SapioCon 2026</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        🌐 Online
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.403858"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://luma.com/boston" target="_blank">Applied Hacking: AI Systems</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Lowell, MA
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.404950"
+                data-type="online">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.eventbrite.com/b/ma--boston/science-and-tech/high-tech/" target="_blank">34th Annual Tech Conference by Tech Club at Harvard Business School</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        🌐 Online
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.405497"
+                data-type="online">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.hsci.harvard.edu/event/massachusetts-life-sciences-innovation-day" target="_blank">Massachusetts Life Sciences Innovation Day</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        🌐 Online
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.406586"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.eventbrite.com/e/tedxandover-june-2025-tickets-1312175505259" target="_blank">TEDx Andover June 2025</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Longboards Restauran...
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.407684"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://cep.mit.edu/tickets" target="_blank">MIT Climate & Energy Prize</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Boston Area
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.408232"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.linkedin.com/pulse/climate-weeks-climatetech-summit-more-convening-action-mhsie" target="_blank">Climatetech Summit</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Houston and Boston
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.408790"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.meetup.com/aittg-boston/" target="_blank">Boston AI Developers Group</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Boston
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.409334"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.eventbrite.com/e/launch-your-own-successful-ai-app-ai-startup-workshop-2025-tickets-892926205317" target="_blank">Launch Your Own Successful AI App | AI Startup</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Boston, MA 02118
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.409868"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.meetup.com/boston-generative-ai-meetup/" target="_blank">Boston Generative AI Meetup</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Greater Boston Area
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.410409"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.meetup.com/boston-ai-network-artificial-intelligence-group/" target="_blank">Boston AI Network</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Boston
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-25T03:06:59.410933"
+                data-type="in-person">
+                <div class="date-badge">Dec 25, 03:06 AM</div>
+                <h2><a href="https://www.eventbrite.com/e/build-your-first-successful-ai-saas-startup-today-workshop-tickets-887031724767" target="_blank">Build Your First Successful AI SaaS Startup Today!</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Boston, MA 02118
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2025-12-31T00:00:00"
+                data-type="in-person">
+                <div class="date-badge">Dec 31, 12:00 AM</div>
+                <h2><a href="https://careerservices.fas.harvard.edu/channels/life-sciences-biotech-pharma/" target="_blank">GSAS: Application Deadline for EXPLORE: Learn the Basics of Starting a Life Science Venture</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Virtual
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2026-01-07T00:00:00"
+                data-type="in-person">
+                <div class="date-badge">Jan 07, 12:00 AM</div>
+                <h2><a href="https://careerservices.fas.harvard.edu/events/category/other-harvard-event/" target="_blank">Flagship Pioneering Fellowship Information Session</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Virtual
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2026-01-24T00:00:00"
+                data-type="in-person">
+                <div class="date-badge">Jan 24, 12:00 AM</div>
+                <h2><a href="https://www.csail.mit.edu/events" target="_blank">Snapdragon Multiverse Hackathon</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Stata Center
+                        
+                    </span>
+                </div>
+            </div>
+            
+            
+            <div class="card" data-source="Tavily Search" data-date="2026-03-19T00:00:00"
+                data-type="in-person">
+                <div class="date-badge">Mar 19, 12:00 AM</div>
+                <h2><a href="https://hmpa.hms.harvard.edu/event/pear-vc-pitch-workshop" target="_blank">Pear VC Pitch Workshop</a></h2>
+
+                <div class="meta">
+                    <span class="source-tag">Tavily Search</span>
+                    <span class="location">
+                        
+                        📍 Unknown
+                        
+                    </span>
+                </div>
+            </div>
+            
+        </div>
+
+        <div id="noEvents" style="display: none; text-align: center; padding: 2rem; color: var(--text-secondary);">
+            No events found matching your filters.
+        </div>
+    </div>
+
+    <script>
+        function setSourceFilter(sourceName, chipElement) {
+            // Update Select
+            const select = document.getElementById('sourceFilter');
+            select.value = sourceName;
+
+            // Update visuals
+            document.querySelectorAll('.source-chip').forEach(c => c.classList.remove('active'));
+            chipElement.classList.add('active');
+
+            // Trigger filter
+            filterEvents();
+        }
+
+        function filterEvents() {
+            const source = document.getElementById('sourceFilter').value;
+            const dateRange = document.getElementById('dateFilter').value;
+            const type = document.getElementById('typeFilter').value;
+            const cards = document.querySelectorAll('.card');
+            let visibleCount = 0;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const nextWeek = new Date(today);
+            nextWeek.setDate(today.getDate() + 7);
+
+            const nextMonth = new Date(today);
+            nextMonth.setDate(today.getDate() + 30);
+
+            cards.forEach(card => {
+                const cardSource = card.getAttribute('data-source');
+                const cardDate = new Date(card.getAttribute('data-date'));
+                const cardType = card.getAttribute('data-type');
+
+                let sourceMatch = (source === 'all') || (cardSource === source);
+                let typeMatch = (type === 'all') || (cardType === type);
+                let dateMatch = true;
+
+                if (dateRange === 'today') {
+                    const tomorrow = new Date(today);
+                    tomorrow.setDate(today.getDate() + 1);
+                    dateMatch = cardDate >= today && cardDate < tomorrow;
+                } else if (dateRange === 'week') {
+                    dateMatch = cardDate >= today && cardDate <= nextWeek;
+                } else if (dateRange === 'month') {
+                    dateMatch = cardDate >= today && cardDate <= nextMonth;
+                }
+
+                if (sourceMatch && dateMatch && typeMatch) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            document.getElementById('noEvents').style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+    </script>
+</body>
+
+</html>
