@@ -217,44 +217,39 @@ def extract_events_with_cerebras(search_results: List[Dict[str, Any]]) -> List[D
     if not data:
         return []
         
-        extracted_list = []
-        if isinstance(data, list):
-            extracted_list = data
-        elif isinstance(data, dict):
-            # Look for a list value if wrapper object returned
-            for k, v in data.items():
-                if isinstance(v, list):
-                    extracted_list = v
-                    break
-            # If no list found, maybe the dict itself is one item? rare but possible.
-            if not extracted_list and data.get('title'):
-                extracted_list = [data]
-        
-        for e in extracted_list:
-            if e.get('title') and e.get('url') and e.get('date'):
-                # Validate Date is in the future
-                try:
-                    evt_date = datetime.strptime(e['date'], "%Y-%m-%d")
-                    now = datetime.now()
-                    
-                    # Hard check: If the event year is older than current year, skip it.
-                    if evt_date.year < now.year:
-                        logger.info(f"Skipping old year event: {e.get('title')} ({e.get('date')})")
-                        continue
-
-                    if evt_date >= now - timedelta(days=1): # Allow today/yesterday roughly
-                         e['source'] = "Tavily Search"
-                         events.append(e)
-                    else:
-                        logger.info(f"Skipping old event from AI: {e.get('title')} ({e.get('date')})")
-                except ValueError:
-                    # Date parsing failed, skip risk of bad data
-                    continue
+    extracted_list = []
+    if isinstance(data, list):
+        extracted_list = data
+    elif isinstance(data, dict):
+        # Look for a list value if wrapper object returned
+        for k, v in data.items():
+            if isinstance(v, list):
+                extracted_list = v
+                break
+        # If no list found, maybe the dict itself is one item? rare but possible.
+        if not extracted_list and data.get('title'):
+            extracted_list = [data]
+    
+    for e in extracted_list:
+        if e.get('title') and e.get('url') and e.get('date'):
+            # Validate Date is in the future
+            try:
+                evt_date = datetime.strptime(e['date'], "%Y-%m-%d")
+                now = datetime.now()
                 
-    except Exception as e:
-        logger.error(f"Cerebras extraction failed: {e}")
-        # Disable risky fallback that invents dates
-        pass
+                # Hard check: If the event year is older than current year, skip it.
+                if evt_date.year < now.year:
+                    logger.info(f"Skipping old year event: {e.get('title')} ({e.get('date')})")
+                    continue
+
+                if evt_date >= now - timedelta(days=1): # Allow today/yesterday roughly
+                        e['source'] = "Tavily Search"
+                        events.append(e)
+                else:
+                    logger.info(f"Skipping old event from AI: {e.get('title')} ({e.get('date')})")
+            except ValueError:
+                # Date parsing failed, skip risk of bad data
+                continue
 
     return events
 
