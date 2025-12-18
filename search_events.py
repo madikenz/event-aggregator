@@ -50,7 +50,8 @@ def search_events_tavily(query: str) -> List[Dict[str, Any]]:
             query=query,
             search_depth="advanced",
             include_domains=["eventbrite.com", "luma.com", "meetup.com", "linkedin.com", "techcrunch.com", "boston.com", "mit.edu", "harvard.edu"],
-            max_results=10
+            max_results=10,
+            days=30  # Restrict to content published/updated in the last 30 days
         )
         return response.get("results", [])
     except Exception as e:
@@ -77,14 +78,21 @@ def extract_events_with_cerebras(search_results: List[Dict[str, Any]]) -> List[D
         })
         
     prompt_json = json.dumps(prompt_items, indent=2)
+    today_str = datetime.now().strftime("%Y-%m-%d")
     
-    system_prompt = """
+    system_prompt = f"""
     You are an event scout for the "New England Science and Entrepreneurship Club" (NESEN).
+    Today is: {today_str}.
+    
     Analyze the search results and identify UPCOMING events (conferences, hackathons, meetups, pitch competitions).
     Focus on: Startups, Biotech, AI, Tech, Entrepreneurship in Boston.
-    Return a JSON ARRAY of valid upcoming events.
-    Format per event: {"title": "...", "description": "...", "date": "YYYY-MM-DD", "location": "...", "url": "...", "relevance_score": 8}
-    If no events, return [].
+    
+    CRITICAL RULES:
+    1. EXTRACT REAL DATES. Do not hallucinate. If the snippet says "Dec 10", assume it is the upcoming Dec 10 relative to {today_str}.
+    2. IGNORE events that have already passed (before {today_str}).
+    3. Return a JSON ARRAY of valid upcoming events.
+    4. Format per event: {{"title": "...", "description": "...", "date": "YYYY-MM-DD", "location": "...", "url": "...", "relevance_score": 8}}
+    5. If no upcoming events are found, return [].
     """
     
     user_prompt = f"Input Data:\n{prompt_json}"
@@ -116,25 +124,24 @@ def extract_events_with_cerebras(search_results: List[Dict[str, Any]]) -> List[D
                 extracted_list = [data]
         
         for e in extracted_list:
-            if e.get('title') and e.get('url'):
-                e['source'] = "Tavily Search"
-                events.append(e)
+            if e.get('title') and e.get('url') and e.get('date'):
+                # Validate Date is in the future
+                try:
+                    evt_date = datetime.strptime(e['date'], "%Y-%m-%d")
+                    now = datetime.now()
+                    if evt_date >= now - timedelta(days=1): # Allow today/yesterday roughly
+                         e['source'] = "Tavily Search"
+                         events.append(e)
+                    else:
+                        logger.info(f"Skipping old event from AI: {e.get('title')} ({e.get('date')})")
+                except ValueError:
+                    # Date parsing failed, skip risk of bad data
+                    continue
                 
     except Exception as e:
         logger.error(f"Cerebras extraction failed: {e}")
-        # Fallback
-        for res in items_to_process:
-             snippet = (res.get("content") or "").lower()
-             if "startup" in snippet or "boston" in snippet:
-                 events.append({
-                     "title": res.get("title"),
-                     "description": snippet[:200],
-                     "date": res.get("published_date") or datetime.now().strftime("%Y-%m-%d"),
-                     "url": res.get("url"),
-                     "location": "Boston (Fallback)",
-                     "relevance_score": 5,
-                     "source": "Tavily Fallback"
-                 })
+        # Disable risky fallback that invents dates
+        pass
 
     return events
 
