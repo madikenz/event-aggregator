@@ -34,16 +34,14 @@ jobs:
     - name: Run Scrapers
       env:
         DATABASE_URL: sqlite:///data/events.db
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
       run: |
         mkdir -p data
         # We need to ensure DB exists or is created
         python -c "from database import models; models.init_db()"
         # Run Scrapers (this takes time so we might limit it or run parallel)
         python scrape.py
-      env:
-        DATABASE_URL: sqlite:///data/events.db
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
 
     - name: Run AI Search (Tavily + Cerebras)
       env:
