@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 import requests
 from dotenv import load_dotenv
 from cerebras.cloud.sdk import Cerebras
+from groq import Groq
 from database.models import get_engine, get_session, Event
 
 # Ensure we can import from parent directory
@@ -15,6 +16,47 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
+def call_ai_with_fallback(client, system_prompt, user_prompt):
+    """
+    Try Cerebras first. If it fails, fallback to Groq.
+    """
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
+    
+    # Attempt 1: Cerebras
+    try:
+        response = client.chat.completions.create(
+            messages=messages,
+            model="llama3.1-8b",
+            response_format={"type": "json_object"}
+        )
+        return json.loads(response.choices[0].message.content)
+    except Exception as e:
+        logger.warning(f"⚠️ Cerebras curation failed: {e}. Switching to Groq fallback...")
+        
+        # Attempt 2: Groq Fallback
+        if not GROQ_API_KEY:
+            logger.error("❌ Groq API Key missing. Cannot fallback.")
+            return None
+            
+        try:
+            groq_client = Groq(api_key=GROQ_API_KEY)
+            response = groq_client.chat.completions.create(
+                messages=messages,
+                model="llama-3.3-70b-versatile",
+                temperature=0.6,
+                max_tokens=4096,
+                response_format={"type": "json_object"}
+            )
+            return json.loads(response.choices[0].message.content)
+        except Exception as groq_e:
+            logger.error(f"❌ Groq fallback also failed: {groq_e}")
+            return None
 
 def send_telegram_message(token, chat_id, message, thread_id=None):
     """Send a message to a Telegram chat via the HTTP API."""
@@ -82,59 +124,48 @@ def curate_events_with_cerebras(events):
     
     user_prompt = f"Events List:\n{events_json}"
 
-    try:
-        response = client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            model="llama3.1-8b",
-            response_format={"type": "json_object"}
-        )
+    extracted = call_ai_with_fallback(client, system_prompt, user_prompt)
+    
+    if not extracted:
+        return events[:10] # Fallback to top 10 recent if AI totally fails
         
-        content = response.choices[0].message.content
-        extracted = json.loads(content)
-        
-        selected_ids = []
-        if isinstance(extracted, list):
-            selected_ids = extracted
-        elif isinstance(extracted, dict):
-             # Try to find a list value
-             for v in extracted.values():
-                 if isinstance(v, list):
-                     selected_ids = v
-                     break
-        
-        # Normalize selected_ids to be a list of strings
-        clean_ids = []
-        if isinstance(selected_ids, list):
-            for item in selected_ids:
-                if isinstance(item, str):
-                    clean_ids.append(item)
-                elif isinstance(item, dict) and 'id' in item:
-                    clean_ids.append(item['id'])
-                elif isinstance(item, dict):
-                     # Try finding any value that looks like an ID? or just skip
-                     pass
-        
-        selected_ids = clean_ids
+    selected_ids = []
+    if isinstance(extracted, list):
+        selected_ids = extracted
+    elif isinstance(extracted, dict):
+            # Try to find a list value
+            for v in extracted.values():
+                if isinstance(v, list):
+                    selected_ids = v
+                    break
+    
+    # Normalize selected_ids to be a list of strings
+    clean_ids = []
+    if isinstance(selected_ids, list):
+        for item in selected_ids:
+            if isinstance(item, str):
+                clean_ids.append(item)
+            elif isinstance(item, dict) and 'id' in item:
+                clean_ids.append(item['id'])
+            elif isinstance(item, dict):
+                    # Try finding any value that looks like an ID? or just skip
+                    pass
+    
+    selected_ids = clean_ids
 
-        # Filter original list
-        top_events = [e for e in events if e.id in selected_ids]
-        
-        # Sort based on the selection order
-        if selected_ids:
-            id_map = {id: index for index, id in enumerate(selected_ids)}
-            top_events.sort(key=lambda x: id_map.get(x.id, 999))
-        
-        # If list is empty (AI failed to return IDs), fallback to date sort
-        if not top_events:
-             return events[:10]
-             
-        return top_events
-    except Exception as e:
-        logger.error(f"Cerebras curation failed: {e}")
-        return events[:10] # Fallback
+    # Filter original list
+    top_events = [e for e in events if e.id in selected_ids]
+    
+    # Sort based on the selection order
+    if selected_ids:
+        id_map = {id: index for index, id in enumerate(selected_ids)}
+        top_events.sort(key=lambda x: id_map.get(x.id, 999))
+    
+    # If list is empty (AI failed to return IDs), fallback to date sort
+    if not top_events:
+            return events[:10]
+            
+    return top_events
 
 
 def generate_digest():
