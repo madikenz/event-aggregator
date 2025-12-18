@@ -128,7 +128,7 @@ def sync_events_to_nocodb():
             payload = {
                 "Title": e.title,
                 "Description": e.description[:500] if e.description else "", # Truncate to be safe
-                "Date": e.date.strftime("%Y-%m-%d") if e.date else None,
+                "Date": e.date.strftime("%Y-%m-%d %H:%M:%S") if e.date else None,
                 "Location": e.location,
                 "URL": e.url,
                 "Source": e.source,
