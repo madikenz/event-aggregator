@@ -10,7 +10,12 @@ import google.generativeai as genai
 from groq import Groq
 import httpx
 
-# ... (rest of imports)
+from cerebras.cloud.sdk import Cerebras
+from dotenv import load_dotenv
+from database.models import Event, get_engine, get_session
+
+# Load env vars
+load_dotenv()
 
 # Load API Keys
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
