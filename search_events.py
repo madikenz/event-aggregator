@@ -28,16 +28,16 @@ cerebras_client = Cerebras(api_key=CEREBRAS_API_KEY)
 
 # Define Search Queries
 SEARCH_QUERIES = [
-    "upcoming startup events in Boston this week",
+    "upcoming startup events in Boston January 2025",
     "upcoming tech conferences Boston 2025",
-    "Boston hackathons 2025",
-    "entrepreneur networking events Boston",
-    "MIT innovation events open to public",
-    "Harvard biotech startup events",
-    "Boston science entrepreneurship events",
+    "Boston hackathons Q1 2025",
+    "entrepreneur networking events Boston 2025",
+    "MIT innovation events 2025 open to public",
+    "Harvard biotech startup events 2025",
+    "Boston science entrepreneurship events 2025",
     "TEDx events Boston 2025",
-    "Climate tech startup events Boston",
-    "AI startup events Boston"
+    "Climate tech startup events Boston 2025",
+    "AI startup events Boston January 2025"
 ]
 
 def search_events_tavily(query: str) -> List[Dict[str, Any]]:
