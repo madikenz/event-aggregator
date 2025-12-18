@@ -147,6 +147,12 @@ def extract_events_with_cerebras(search_results: List[Dict[str, Any]]) -> List[D
                 try:
                     evt_date = datetime.strptime(e['date'], "%Y-%m-%d")
                     now = datetime.now()
+                    
+                    # Hard check: If the event year is older than current year, skip it.
+                    if evt_date.year < now.year:
+                        logger.info(f"Skipping old year event: {e.get('title')} ({e.get('date')})")
+                        continue
+
                     if evt_date >= now - timedelta(days=1): # Allow today/yesterday roughly
                          e['source'] = "Tavily Search"
                          events.append(e)
