@@ -219,7 +219,7 @@ if __name__ == "__main__":
          sys.exit(0)
 
     if not token or not chat_id:
-        logger.error("Error: TELEGRAM_BOT_TOKEN or TELEGRAM_ADMIN_CHAT_ID not set.")
+        logger.error(f"Error: Credentials missing. Token set: {bool(token)}, Chat ID set: {bool(chat_id)}")
         print(generate_digest())
         sys.exit(1)
         
