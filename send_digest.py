@@ -197,6 +197,17 @@ def generate_digest():
             message += f"   📅 {date_str} | {event.source}\n"
             message += f"   🔗 [Link]({event.url})\n\n"
         
+        # Add Scrape Stats
+        try:
+            stats_path = os.path.join("data", "scrape_stats.json")
+            if os.path.exists(stats_path):
+                with open(stats_path, "r") as f:
+                    stats_data = json.load(f)
+                    total_scraped = stats_data.get("total_new", 0)
+                    message += f"📊 Total Items Scraped: {total_scraped}\n"
+        except Exception:
+            pass # Fail silently if stats missing due to manual run
+
         message += "[​​​​​​​​​​​](https://raw.githubusercontent.com/madikenz/event-aggregator/main/logo/NESEN-LOGO.png)👇 *See all events:* https://madikenz.github.io/event-aggregator/"
         
         return message

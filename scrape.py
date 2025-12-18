@@ -101,13 +101,23 @@ def main():
                     err_clean = err.replace('*', '').replace('_', '').replace('`', '')
                     message += f"• {name}: `{err_clean}`\n"
             
-            url = f"https://api.telegram.org/bot{token}/sendMessage"
-            requests.post(url, json={
-                "chat_id": chat_id,
-                "text": message,
-                "parse_mode": "Markdown"
-            })
-            logger.info("Telegram notification sent.")
+            # Save stats to file for the digest script to use
+            try:
+                stats_path = os.path.join("data", "scrape_stats.json")
+                with open(stats_path, "w") as f:
+                    json.dump(stats, f)
+                logger.info(f"Scrape stats saved to {stats_path}")
+            except Exception as e:
+                logger.error(f"Failed to save scrape stats: {e}")
+
+            # Telegram notification disabled per user request
+            # url = f"https://api.telegram.org/bot{token}/sendMessage"
+            # requests.post(url, json={
+            #     "chat_id": chat_id,
+            #     "text": message,
+            #     "parse_mode": "Markdown"
+            # })
+            # logger.info("Telegram notification sent.")
     except Exception as e:
         logger.error(f"Failed to send Telegram notification: {e}")
 
