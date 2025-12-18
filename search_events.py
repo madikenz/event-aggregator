@@ -168,11 +168,11 @@ def call_ai_with_fallback(system_prompt: str, user_prompt: str, json_mode: bool 
         
         # Attempt 2: Groq Fallback
         try:
-            # User requested 'qwen/qwen3-32b'. If not available, we might need 'qwen-2.5-32b' or 'llama-3.3-70b-versatile'.
-            # Let's try 'qwen-2.5-32b' as it is the closest standard ID on Groq for what user asked.
+            # User requested 'qwen/qwen3-32b' but it seems unstable/missing. 
+            # Switching to 'llama-3.3-70b-versatile' which is Groq's current stable flagship.
             response = groq_client.chat.completions.create(
                 messages=messages,
-                model="qwen-2.5-32b", 
+                model="llama-3.3-70b-versatile", 
                 temperature=0.6,
                 max_tokens=4096,
                 response_format={"type": "json_object"} if json_mode else None
