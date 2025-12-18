@@ -226,27 +226,128 @@ def save_events_to_db(events: List[Dict[str, Any]]):
     finally:
         session.close()
 
+from playwright.sync_api import sync_playwright
+
+def verify_with_playwright(event_candidate: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Visit the URL using Playwright to extract full text and verify the date/relevance with AI.
+    Returns the verified event dict (updated) or None if invalid.
+    """
+    url = event_candidate.get("url")
+    if not url:
+        return None
+        
+    logger.info(f"   🔎 Verifying URL with Playwright: {url}")
+    page_text = ""
+    
+    try:
+        with sync_playwright() as p:
+            # Launch without user_data_dir to avoid locking issues, use headless
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            # Set timeout to 15s to be fast
+            page.goto(url, timeout=15000, wait_until="domcontentloaded") 
+            
+            # Simple heuristic to get main content
+            page_text = page.evaluate("document.body.innerText")
+            browser.close()
+            
+    except Exception as e:
+        logger.warning(f"   ⚠️ Playwright verification failed for {url}: {e}")
+        # If site fails (timeout/block), we skip verification and rely on Stage 1 (or discard? Let's keep for now but log)
+        return event_candidate
+
+    # Clean text
+    clean_text = " ".join(page_text.split())[:3000] # Limit tokens
+    
+    # AI Verification Prompt
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    system_prompt = f"""
+    You are a Fact-Checker for the NESEN EventAggregator.
+    Today is {today_str}.
+    
+    Task: Verify if this event is REAL, UPCOMING, and RELEVANT based on the webpage text.
+    
+    Rules:
+    1. EXTRACT the exact event date from the text.
+    2. If the event date is in the PAST (before {today_str}), is from a PREVIOUS YEAR (e.g. copyright 2024 doesn't count, look for event date 2014, 2023...), or cannot be found -> INVALID.
+    3. If the page is a generic "Calendar" or "List of events" and not a specific event page -> INVALID.
+    4. Return JSON: {{"is_valid": true/false, "confirmed_date": "YYYY-MM-DD", "reason": "...", "updated_title": "..."}}
+    """
+    
+    user_prompt = f"Candidate Event: {json.dumps(event_candidate)}\n\nWebpage Content Preview:\n{clean_text}"
+    
+    try:
+        response = cerebras_client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            model="llama3.1-8b",
+            response_format={"type": "json_object"}
+        )
+        data = json.loads(response.choices[0].message.content)
+        
+        if data.get("is_valid"):
+            # Update date if AI found a better one
+            if data.get("confirmed_date"):
+                 event_candidate["date"] = data["confirmed_date"]
+            if data.get("updated_title"):
+                 event_candidate["title"] = data["updated_title"]
+            logger.info(f"   ✅ Verified: {event_candidate['title']} ({event_candidate['date']})")
+            return event_candidate
+        else:
+            logger.info(f"   ❌ Rejected by Verification: {data.get('reason')} (Real content date: {data.get('confirmed_date')})")
+            return None
+            
+    except Exception as e:
+        logger.error(f"   AI Verification Logic Failed: {e}")
+        return event_candidate # Fallback to original
+
 def run_daily_search():
     logger.info("Starting Daily Search Job...")
-    all_events = []
     
     selected_queries = generate_dynamic_queries() 
+    
+    final_verified_events = []
     
     for query in selected_queries:
         results = search_events_tavily(query)
         if results:
             logger.info(f"   --> Tavily found {len(results)} raw results.")
-            extracted = extract_events_with_cerebras(results)
-            logger.info(f"   --> AI Extracted {len(extracted)} valid events.")
-            all_events.extend(extracted)
+            
+            # Stage 1: Fast Snippet Extraction
+            candidates = extract_events_with_cerebras(results)
+            logger.info(f"   --> Stage 1: {len(candidates)} candidates.")
+            
+            # Stage 2: Deep Verification
+            for cand in candidates:
+                verified = verify_with_playwright(cand)
+                if verified:
+                    try: 
+                        # Final date safety check
+                        evt_date = datetime.strptime(verified['date'], "%Y-%m-%d")
+                        if evt_date.year < datetime.now().year:
+                             logger.info(f"   ❌ Final Safety Check: Date {verified['date']} is too old.")
+                             continue
+                        final_verified_events.append(verified)
+                    except:
+                        # If date parsing fails, keep it (AI verification passed)
+                        final_verified_events.append(verified)
+                        
             time.sleep(2)
             
+    # Remove duplicates by URL
     unique_events = {}
-    for e in all_events:
+    for e in final_verified_events:
         if e.get('url'):
             unique_events[e['url']] = e
     
-    save_events_to_db(list(unique_events.values()))
+    if unique_events:
+        save_events_to_db(list(unique_events.values()))
+    else:
+        logger.info("No events found after verification.")
+        
     logger.info("Daily Search Job Completed.")
 
 if __name__ == "__main__":
