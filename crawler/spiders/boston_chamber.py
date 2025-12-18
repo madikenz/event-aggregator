@@ -65,7 +65,16 @@ class BostonChamberSpider(scrapy.Spider):
             
             item['location'] = location_str
 
+            # Description
+            # Usually in a p tag or similar. Inspecting CSS classes: usually list text is minimal.
+            # We can use the text we found in data_texts as fallback
+            desc_text = event.css('.card-text::text').get()
+            if not desc_text:
+                desc_text = " ".join(data_texts)
+            item['description'] = desc_text.strip() if desc_text else ""
+
             # Parse Date
+            valid_date = False
             if date_str:
                 try:
                     # Example: Thursday 1/22/26 or similar
@@ -73,20 +82,32 @@ class BostonChamberSpider(scrapy.Spider):
                     
                     if time_str:
                         # "9:30AM-11:30AM"
+                        # Handle space around AM/PM if needed
                         start_time = time_str.split('-')[0].strip()
+                        # normalize 9:30AM to 9:30 AM for %p parser if needed, usually %p handles it if attached? No, %I:%M%p expects attached.
+                        # NocoDB/Python strptime can be finicky.
                         full_str = f"{clean_date} {start_time}"
                         try:
                             item['date'] = datetime.strptime(full_str, "%m/%d/%y %I:%M%p")
+                            valid_date = True
                         except:
-                            # Try without time
-                            item['date'] = datetime.strptime(clean_date, "%m/%d/%y")
+                            # Try with space
+                             try:
+                                item['date'] = datetime.strptime(full_str, "%m/%d/%y %I:%M %p")
+                                valid_date = True
+                             except:
+                                # Try without time
+                                item['date'] = datetime.strptime(clean_date, "%m/%d/%y")
+                                valid_date = True
                     else:
                         item['date'] = datetime.strptime(clean_date, "%m/%d/%y")
+                        valid_date = True
                 except Exception as e:
                     self.logger.warning(f"Error parsing date '{date_str}': {e}")
-                    item['date'] = datetime.now()
-            else:
-                 item['date'] = datetime.now()
+            
+            if not valid_date:
+                self.logger.warning(f"⚠️ Skipping event '{item['title']}' due to missing/invalid date.")
+                continue
 
             # Image
             style = event.css('.image-div-events-calendar::attr(style)').get()
