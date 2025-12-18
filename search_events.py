@@ -304,6 +304,9 @@ def verify_with_playwright(event_candidate: Dict[str, Any]) -> Dict[str, Any]:
     user_prompt = f"Candidate Event: {json.dumps(event_candidate)}\n\nWebpage Content Preview:\n{clean_text}"
     
     try:
+        # Sleep to avoid Rate Limits (429)
+        time.sleep(3)
+        
         response = cerebras_client.chat.completions.create(
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -328,7 +331,9 @@ def verify_with_playwright(event_candidate: Dict[str, Any]) -> Dict[str, Any]:
             
     except Exception as e:
         logger.error(f"   AI Verification Logic Failed: {e}")
-        return event_candidate # Fallback to original
+        # FAIL SAFE: Should we save unverified? User wants strictness.
+        # If verification crashes (e.g. 429), better to discard than to save bad data.
+        return None 
 
 def run_daily_search():
     logger.info("Starting Daily Search Job...")
@@ -343,6 +348,8 @@ def run_daily_search():
             logger.info(f"   --> Tavily found {len(results)} raw results.")
             
             # Stage 1: Fast Snippet Extraction
+            # Sleep before AI extraction too
+            time.sleep(2)
             candidates = extract_events_with_cerebras(results)
             logger.info(f"   --> Stage 1: {len(candidates)} candidates.")
             
@@ -361,7 +368,7 @@ def run_daily_search():
                         # If date parsing fails, keep it (AI verification passed)
                         final_verified_events.append(verified)
                         
-            time.sleep(2)
+            time.sleep(5)
             
     # Remove duplicates by URL
     unique_events = {}
