@@ -16,7 +16,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def send_telegram_message(token, chat_id, message):
+def send_telegram_message(token, chat_id, message, thread_id=None):
     """Send a message to a Telegram chat via the HTTP API."""
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {
@@ -25,6 +25,8 @@ def send_telegram_message(token, chat_id, message):
         "parse_mode": "Markdown",
         "disable_web_page_preview": True
     }
+    if thread_id:
+        payload['message_thread_id'] = thread_id
     try:
         response = requests.post(url, json=payload, timeout=10)
         response.raise_for_status()
@@ -210,6 +212,7 @@ if __name__ == "__main__":
     
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_ADMIN_CHAT_ID")
+    topic_id = os.environ.get("TELEGRAM_TOPIC_ID")
     
     if len(sys.argv) > 1 and sys.argv[1] == "--test":
          print(generate_digest())
@@ -222,4 +225,4 @@ if __name__ == "__main__":
         
     msg = generate_digest()
     if msg:
-        send_telegram_message(token, chat_id, msg)
+        send_telegram_message(token, chat_id, msg, thread_id=topic_id)

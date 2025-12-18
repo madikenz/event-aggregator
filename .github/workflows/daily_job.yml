@@ -68,6 +68,7 @@ jobs:
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+        TELEGRAM_TOPIC_ID: ${{ secrets.TELEGRAM_TOPIC_ID }}
         CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
         DATABASE_URL: sqlite:///data/events.db
       run: |
