@@ -363,9 +363,12 @@ def verify_with_playwright(event_candidate: Dict[str, Any]) -> Dict[str, Any]:
     
     Rules:
     1. EXTRACT the exact event date from the text.
-    2. If the event date is in the PAST (before {today_str}), is from a PREVIOUS YEAR (e.g. copyright 2024 doesn't count, look for event date 2014, 2023...), or cannot be found -> INVALID.
-    3. If the page is a generic "Calendar" or "List of events" and not a specific event page -> INVALID.
-    4. Return JSON: {{"is_valid": true/false, "confirmed_date": "YYYY-MM-DD", "reason": "...", "updated_title": "..."}}
+    2. STRICTLY REJECT PLACEHOLDERS:
+       - If the date is "January 1st" or "December 31st" at "11:59 PM" or similar, and it looks like a placeholder for "TBD" -> INVALID.
+       - If the page says "Spring 2026" or "January 2026" without a specific day -> INVALID.
+    3. If the event date is in the PAST (before {today_str}), is from a PREVIOUS YEAR, or cannot be found -> INVALID.
+    4. If the page is a generic "Calendar", "List of events", or "Career Fair Announcement" covering a whole semester -> INVALID. We want the SPECIFIC event page.
+    5. Return JSON: {{"is_valid": true/false, "confirmed_date": "YYYY-MM-DD", "reason": "...", "updated_title": "..."}}
     """
     
     user_prompt = f"Candidate Event: {json.dumps(event_candidate)}\n\nWebpage Content Preview:\n{clean_text}"
