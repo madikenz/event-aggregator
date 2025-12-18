@@ -1,8 +1,10 @@
 import os
 import requests
 import logging
+import json
 from dotenv import load_dotenv
 from database.models import get_session, get_engine, Event
+from tagging_utils import generate_tags
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -77,10 +79,51 @@ def sync_events_to_nocodb():
             
         logger.info(f"✅ Found Table ID: {table_id}")
 
+        # --- AUTO-CREATE COLUMNS START ---
+        def ensure_column(col_name, col_type):
+            # Check if column exists
+            cols_url = f"{NOCODB_URL}/meta/tables/{table_id}/columns"
+            try:
+                c_resp = requests.get(cols_url, headers=headers)
+                existing = [c['title'] for c in c_resp.json().get('list', [])]
+                
+                if col_name not in existing:
+                    logger.info(f"⚙️ Creating missing column: {col_name}")
+                    # Create column
+                    create_payload = {
+                        "title": col_name,
+                        "column_name": col_name,
+                        "uidt": col_type # 'LongText', 'Date', 'SingleLineText', etc.
+                    }
+                    requests.post(cols_url, json=create_payload, headers=headers)
+            except Exception as e:
+                logger.warning(f"Column check for {col_name} failed: {e}")
+
+        # Define schema needs
+        # Mappings: 'Description' -> LongText, 'Date' -> Date, 'Location' -> SingleLineText, 'URL' -> URL, 'Source' -> SingleLineText, 'Tags' -> SingleLineText
+        ensure_column("Description", "LongText")
+        ensure_column("Date", "Date")
+        ensure_column("Location", "SingleLineText")
+        ensure_column("URL", "URL")
+        ensure_column("Source", "SingleLineText")
+        ensure_column("Tags", "SingleLineText")
+        # --- AUTO-CREATE COLUMNS END ---
+
         # Now we can push records
         records_url = f"{NOCODB_URL}/tables/{table_id}/records"
         
         for e in events:
+            # Generate tags if missing
+            if not e.tags_json or e.tags_json == '[]':
+                tags_list = json.loads(generate_tags(e.title, e.description))
+            else:
+                try:
+                    tags_list = json.loads(e.tags_json)
+                except:
+                    tags_list = []
+            
+            tags_str = ", ".join(tags_list)
+
             # Prepare payload
             payload = {
                 "Title": e.title,
@@ -88,7 +131,8 @@ def sync_events_to_nocodb():
                 "Date": e.date.strftime("%Y-%m-%d") if e.date else None,
                 "Location": e.location,
                 "URL": e.url,
-                "Source": e.source
+                "Source": e.source,
+                "Tags": tags_str
             }
             
             # Simple check: Try to create. If we wanted duplication check, we'd search first.
