@@ -121,7 +121,7 @@ def extract_events_with_cerebras(search_results: List[Dict[str, Any]]) -> List[D
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            model="llama3.1-8b",
+            model="qwen-2.5-32b",
             response_format={"type": "json_object"}
         )
         
