@@ -77,7 +77,7 @@ def search_events_tavily(query: str) -> List[Dict[str, Any]]:
 
 def extract_events_with_cerebras(search_results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
-    Use Cerebras (llama3.1-70b) to extract structured event data from search results.
+    Use Cerebras (qwen-2.5-32b) to extract structured event data from search results.
     """
     events = []
     
