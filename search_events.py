@@ -56,6 +56,8 @@ def generate_dynamic_queries() -> List[str]:
         f"AI startup events Boston {current_month} {current_year}"
     ]
     return queries
+
+def search_events_tavily(query: str) -> List[Dict[str, Any]]:
     """
     Search for events using Tavily API.
     """
