@@ -17,6 +17,10 @@ from database.models import Event, get_engine, get_session
 # Load env vars
 load_dotenv()
 
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 # Load API Keys
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY")
