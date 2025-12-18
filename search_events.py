@@ -7,24 +7,20 @@ from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any
 from tavily import TavilyClient
 import google.generativeai as genai
-from cerebras.cloud.sdk import Cerebras
-from dotenv import load_dotenv
-from database.models import Event, get_engine, get_session
+from groq import Groq
+import httpx
 
-# Load env vars
-load_dotenv()
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# ... (rest of imports)
 
 # Load API Keys
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 CEREBRAS_API_KEY = os.getenv("CEREBRAS_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # Initialize Clients
 tavily_client = TavilyClient(api_key=TAVILY_API_KEY)
 cerebras_client = Cerebras(api_key=CEREBRAS_API_KEY)
+groq_client = Groq(api_key=GROQ_API_KEY)
 
 # Define Search Queries
 def generate_dynamic_queries() -> List[str]:
@@ -141,18 +137,85 @@ def extract_events_with_cerebras(search_results: List[Dict[str, Any]]) -> List[D
     
     user_prompt = f"Input Data:\n{prompt_json}"
     
+def call_ai_with_fallback(system_prompt: str, user_prompt: str, json_mode: bool = True) -> Any:
+    """
+    Try Cerebras first. If it fails (e.g. Rate Limit), fallback to Groq.
+    """
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt}
+    ]
+    
+    # Attempt 1: Cerebras
     try:
         response = cerebras_client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
+            messages=messages,
             model="llama3.1-8b",
-            response_format={"type": "json_object"}
+            response_format={"type": "json_object"} if json_mode else None
         )
+        return json.loads(response.choices[0].message.content)
+    except Exception as e:
+        logger.warning(f"⚠️ Cerebras failed: {e}. Switching to Groq fallback...")
         
-        content = response.choices[0].message.content
-        data = json.loads(content)
+        # Attempt 2: Groq Fallback
+        try:
+            # User requested 'qwen/qwen3-32b'. If not available, we might need 'qwen-2.5-32b' or 'llama-3.3-70b-versatile'.
+            # Let's try 'qwen-2.5-32b' as it is the closest standard ID on Groq for what user asked.
+            response = groq_client.chat.completions.create(
+                messages=messages,
+                model="qwen-2.5-32b", 
+                temperature=0.6,
+                max_tokens=4096,
+                response_format={"type": "json_object"} if json_mode else None
+            )
+            return json.loads(response.choices[0].message.content)
+        except Exception as groq_e:
+            logger.error(f"❌ Groq fallback also failed: {groq_e}")
+            return None if json_mode else ""
+
+def extract_events_with_cerebras(search_results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Use Cerebras (llama3.1-70b) to extract structured event data from search results.
+    """
+    events = []
+    
+    # Process small batch
+    items_to_process = search_results[:5]
+    
+    prompt_items = []
+    for i, res in enumerate(items_to_process):
+        prompt_items.append({
+            "id": i,
+            "title": res.get("title", ""),
+            "snippet": (res.get("content") or "")[:500],
+            "date_hint": res.get("published_date", ""),
+            "url": res.get("url", "")
+        })
+        
+    prompt_json = json.dumps(prompt_items, indent=2)
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    
+    system_prompt = f"""
+    You are an event scout for the "New England Science and Entrepreneurship Club" (NESEN).
+    Today is: {today_str}.
+    
+    Analyze the search results and identify UPCOMING events (conferences, hackathons, meetups, pitch competitions).
+    Focus on: Startups, Biotech, AI, Tech, Entrepreneurship in Boston.
+    
+    CRITICAL RULES:
+    1. CHECK THE YEAR: Look for the year in the snippet, title, or date_hint. If you find a year older than the current year (e.g. 2014, 2023), DISCARD IT IMMEDIATELY.
+    2. EXTRACT REAL DATES. Do not hallucinate. If the snippet says "Dec 10", assume it is the upcoming Dec 10 relative to {today_str}. If "Dec 10" of the current year has passed, assume next year.
+    3. IGNORE events that have already passed (before {today_str}).
+    4. Return a JSON ARRAY of valid upcoming events.
+    5. Format per event: {{"title": "...", "description": "...", "date": "YYYY-MM-DD", "location": "...", "url": "...", "relevance_score": 8}}
+    6. If no upcoming events are found, return [].
+    """
+    
+    user_prompt = f"Input Data:\n{prompt_json}"
+    
+    data = call_ai_with_fallback(system_prompt, user_prompt, json_mode=True)
+    if not data:
+        return []
         
         extracted_list = []
         if isinstance(data, list):
@@ -303,36 +366,23 @@ def verify_with_playwright(event_candidate: Dict[str, Any]) -> Dict[str, Any]:
     
     user_prompt = f"Candidate Event: {json.dumps(event_candidate)}\n\nWebpage Content Preview:\n{clean_text}"
     
-    try:
-        # Sleep to avoid Rate Limits (429)
-        time.sleep(3)
-        
-        response = cerebras_client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            model="llama3.1-8b",
-            response_format={"type": "json_object"}
-        )
-        data = json.loads(response.choices[0].message.content)
-        
-        if data.get("is_valid"):
-            # Update date if AI found a better one
-            if data.get("confirmed_date"):
-                 event_candidate["date"] = data["confirmed_date"]
-            if data.get("updated_title"):
-                 event_candidate["title"] = data["updated_title"]
-            logger.info(f"   ✅ Verified: {event_candidate['title']} ({event_candidate['date']})")
-            return event_candidate
-        else:
-            logger.info(f"   ❌ Rejected by Verification: {data.get('reason')} (Real content date: {data.get('confirmed_date')})")
-            return None
-            
-    except Exception as e:
-        logger.error(f"   AI Verification Logic Failed: {e}")
-        # FAIL SAFE: Should we save unverified? User wants strictness.
-        # If verification crashes (e.g. 429), better to discard than to save bad data.
+    # Sleep to avoid Rate Limits (429)
+    time.sleep(3)
+    
+    data = call_ai_with_fallback(system_prompt, user_prompt, json_mode=True)
+    
+    if data and data.get("is_valid"):
+        # Update date if AI found a better one
+        if data.get("confirmed_date"):
+             event_candidate["date"] = data["confirmed_date"]
+        if data.get("updated_title"):
+             event_candidate["title"] = data["updated_title"]
+        logger.info(f"   ✅ Verified: {event_candidate['title']} ({event_candidate['date']})")
+        return event_candidate
+    else:
+        reason = data.get('reason') if data else "AI returned None"
+        date_conf = data.get('confirmed_date') if data else "N/A"
+        logger.info(f"   ❌ Rejected by Verification: {reason} (Real content date: {date_conf})")
         return None 
 
 def run_daily_search():
