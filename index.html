@@ -227,18 +227,14 @@
             </h3>
             <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
                 <span class="source-chip active" onclick="setSourceFilter('all', this)" id="chip-all">All Sources <span
-                        style="opacity: 0.6; font-size: 0.8em; margin-left: 4px;">(80)</span></span>
-                
-                <span class="source-chip" onclick="setSourceFilter('Eventbrite', this)">
-                    Eventbrite <span style="opacity: 0.6; font-size: 0.8em; margin-left: 4px;">(19)</span>
-                </span>
+                        style="opacity: 0.6; font-size: 0.8em; margin-left: 4px;">(60)</span></span>
                 
                 <span class="source-chip" onclick="setSourceFilter('HBS Alumni Boston', this)">
                     HBS Alumni Boston <span style="opacity: 0.6; font-size: 0.8em; margin-left: 4px;">(16)</span>
                 </span>
                 
                 <span class="source-chip" onclick="setSourceFilter('Luma', this)">
-                    Luma <span style="opacity: 0.6; font-size: 0.8em; margin-left: 4px;">(7)</span>
+                    Luma <span style="opacity: 0.6; font-size: 0.8em; margin-left: 4px;">(6)</span>
                 </span>
                 
                 <span class="source-chip" onclick="setSourceFilter('MIT Entrepreneurship', this)">
@@ -270,8 +266,6 @@
                 <!-- Hidden source filter, controlled by chips -->
                 <select id="sourceFilter" onchange="filterEvents()" style="display: none;">
                     <option value="all">All Sources</option>
-                    
-                    <option value="Eventbrite">Eventbrite</option>
                     
                     <option value="HBS Alumni Boston">HBS Alumni Boston</option>
                     
@@ -307,22 +301,6 @@
         <div class="grid" id="eventsGrid">
             
             
-            <div class="card" data-source="Luma" data-date="2025-12-18T15:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 18, 03:00 PM</div>
-                <h2><a href="https://luma.com/bowaonvl" target="_blank">Applied Hacking: AI Systems - (Lowell, MA)</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Luma</span>
-                    <span class="location">
-                        
-                        📍 900 Chelmsford St
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
             <div class="card" data-source="Luma" data-date="2025-12-18T18:00:00"
                 data-type="in-person">
                 <div class="date-badge">Dec 18, 06:00 PM</div>
@@ -349,22 +327,6 @@
                     <span class="location">
                         
                         📍 51 Stuart St
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-19T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 19, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/reggae-artist-malie-donn-live-concert-in-boston-tickets-1886759170469" target="_blank">REGGAE ARTIST MALIE DONN LIVE CONCERT IN BOSTON</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 Oceanside Events Cen...
                         
                     </span>
                 </div>
@@ -435,54 +397,6 @@
             </div>
             
             
-            <div class="card" data-source="Eventbrite" data-date="2025-12-20T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 20, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/tetama-a-purely-south-indian-dance-party-tickets-1975399547222" target="_blank">Te.Ta.Ma - A Purely South Indian Dance Party</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 Academy Boston
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-20T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 20, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/glynnmas-2025-tickets-1909584291019" target="_blank">Glynnmas 2025</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 Central Wharf Co.
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-20T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 20, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/di-soca-chamber-tickets-1946292787119" target="_blank">DI SOCA CHAMBER</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 Sorrel and Lime
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
             <div class="card" data-source="MIT HST" data-date="2025-12-22T00:00:00"
                 data-type="online">
                 <div class="date-badge">Dec 22, 12:00 AM</div>
@@ -515,192 +429,16 @@
             </div>
             
             
-            <div class="card" data-source="Eventbrite" data-date="2025-12-23T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 23, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/winter-heat-mckresha-ft-lyrical-son-the-grand-boston-tickets-1975702507384" target="_blank">WINTER HEAT - McKresha ft Lyrical Son @The Grand Boston</a></h2>
+            <div class="card" data-source="MIT HST" data-date="2026-01-05T00:00:00"
+                data-type="online">
+                <div class="date-badge">Jan 05, 12:00 AM</div>
+                <h2><a href="https://hst.mit.edu/news-events/events-academic-calendar" target="_blank">First Day of Independent Activities Period (IAP) at MIT</a></h2>
 
                 <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
+                    <span class="source-tag">MIT HST</span>
                     <span class="location">
                         
-                        📍 The Grand Boston
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-26T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 26, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/zeddy-will-live-ugly-sweater-party-tickets-1976337172685" target="_blank">ZEDDY WILL LIVE - UGLY SWEATER PARTY</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 SOJUba
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-27T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 27, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/new-england-black-tie-winter-gala-2025-royale-saturday-1227-wkid-capri-tickets-1934411269179" target="_blank">New England Black Tie Winter Gala 2025 @ Royale, Saturday 12/27 w/Kid Capri</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 Royale
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-27T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 27, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/ladies-love-konpa-bal-edition-tickets-1774748613879" target="_blank">Ladies Love Konpa Bal Edition</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 MIXX 360 Nightlife
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-31T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 31, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/fenway-all-access-boston-new-years-eve-2026-tickets-1964589171096" target="_blank">Fenway All Access - Boston New Year's Eve 2026</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 Game On!
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-31T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 31, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/2026-new-years-eve-party-at-carrie-nation-tickets-1975055005689" target="_blank">2026 New Year's Eve Party at Carrie Nation</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 Carrie Nation Cockta...
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-31T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 31, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/blend-presents-the-ozdust-ball-new-years-eve-tickets-1893847862939" target="_blank">BLEND PRESENTS: THE OZDUST BALL NEW YEARS EVE</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 Blend
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-31T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 31, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/new-years-eve-party-tickets-1977629084829" target="_blank">New Years Eve Party</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 McGonagle’s Pub & Re...
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-31T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 31, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/30-back-bay-ball-new-years-eve-at-westin-copley-grand-ballroom-tickets-1520064065539" target="_blank">30+ Back Bay Ball: New Years Eve  at Westin Copley Grand Ballroom</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 The Westin Copley Pl...
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-31T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 31, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/boston-new-years-eve-party-the-resolution-ball-20252026-tickets-1841137494809" target="_blank">Boston New Years Eve Party | The Resolution Ball 2025–2026</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 The Westin Copley Pl...
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-31T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 31, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/a-new-years-eve-rodeo-at-aeronaut-tickets-1976464771336" target="_blank">A New Year's Eve Rodeo at Aeronaut</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 Aeronaut Brewing Com...
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2025-12-31T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Dec 31, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/shagadelic-nye-disco-dance-party-tickets-1956516506539" target="_blank">Shagadelic NYE Disco Dance Party</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 The Center for Arts ...
+                        🌐 Online
                         
                     </span>
                 </div>
@@ -723,22 +461,6 @@
             </div>
             
             
-            <div class="card" data-source="MIT HST" data-date="2026-01-05T00:00:00"
-                data-type="online">
-                <div class="date-badge">Jan 05, 12:00 AM</div>
-                <h2><a href="https://hst.mit.edu/news-events/events-academic-calendar" target="_blank">First Day of Independent Activities Period (IAP) at MIT</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">MIT HST</span>
-                    <span class="location">
-                        
-                        🌐 Online
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
             <div class="card" data-source="HBS Alumni Boston" data-date="2026-01-08T00:00:00"
                 data-type="online">
                 <div class="date-badge">Jan 08, 12:00 AM</div>
@@ -749,22 +471,6 @@
                     <span class="location">
                         
                         🌐 Online
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2026-01-10T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Jan 10, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/rb-only-live-boston-ma-tickets-1976048291634" target="_blank">R&B ONLY LIVE - Boston, MA</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 Roadrunner
                         
                     </span>
                 </div>
@@ -931,26 +637,10 @@
             </div>
             
             
-            <div class="card" data-source="Eventbrite" data-date="2026-01-25T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Jan 25, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/boston-princess-day-tickets-1965585896328" target="_blank">Boston Princess Day</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 Wyndham Boston Beaco...
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
             <div class="card" data-source="MIT HST" data-date="2026-01-26T00:00:00"
                 data-type="online">
                 <div class="date-badge">Jan 26, 12:00 AM</div>
-                <h2><a href="https://hst.mit.edu/news-events/events-academic-calendar" target="_blank">MIT Spring Registration Week</a></h2>
+                <h2><a href="https://hst.mit.edu/news-events/events-academic-calendar" target="_blank">Oral Qualifying Exams</a></h2>
 
                 <div class="meta">
                     <span class="source-tag">MIT HST</span>
@@ -966,7 +656,7 @@
             <div class="card" data-source="MIT HST" data-date="2026-01-26T00:00:00"
                 data-type="online">
                 <div class="date-badge">Jan 26, 12:00 AM</div>
-                <h2><a href="https://hst.mit.edu/news-events/events-academic-calendar" target="_blank">Oral Qualifying Exams</a></h2>
+                <h2><a href="https://hst.mit.edu/news-events/events-academic-calendar" target="_blank">MIT Spring Registration Week</a></h2>
 
                 <div class="meta">
                     <span class="source-tag">MIT HST</span>
@@ -1101,22 +791,6 @@
                     <span class="location">
                         
                         📍 Boston, Massachusett...
-                        
-                    </span>
-                </div>
-            </div>
-            
-            
-            <div class="card" data-source="Eventbrite" data-date="2026-01-31T00:00:00"
-                data-type="in-person">
-                <div class="date-badge">Jan 31, 12:00 AM</div>
-                <h2><a href="https://www.eventbrite.com/e/32nd-annual-venture-capital-private-equity-conference-at-hbs-tickets-1708174990379" target="_blank">32nd Annual Venture Capital & Private Equity Conference at HBS</a></h2>
-
-                <div class="meta">
-                    <span class="source-tag">Eventbrite</span>
-                    <span class="location">
-                        
-                        📍 Harvard Business Sch...
                         
                     </span>
                 </div>
@@ -1414,7 +1088,7 @@
             <div class="card" data-source="MIT HST" data-date="2026-03-23T00:00:00"
                 data-type="online">
                 <div class="date-badge">Mar 23, 12:00 AM</div>
-                <h2><a href="https://hst.mit.edu/news-events/events-academic-calendar" target="_blank">MIT Spring Break</a></h2>
+                <h2><a href="https://hst.mit.edu/news-events/events-academic-calendar" target="_blank">HMS M1 Spring Break</a></h2>
 
                 <div class="meta">
                     <span class="source-tag">MIT HST</span>
@@ -1430,7 +1104,7 @@
             <div class="card" data-source="MIT HST" data-date="2026-03-23T00:00:00"
                 data-type="online">
                 <div class="date-badge">Mar 23, 12:00 AM</div>
-                <h2><a href="https://hst.mit.edu/news-events/events-academic-calendar" target="_blank">HMS M1 Spring Break</a></h2>
+                <h2><a href="https://hst.mit.edu/news-events/events-academic-calendar" target="_blank">MIT Spring Break</a></h2>
 
                 <div class="meta">
                     <span class="source-tag">MIT HST</span>
