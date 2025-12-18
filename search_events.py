@@ -70,7 +70,33 @@ def search_events_tavily(query: str) -> List[Dict[str, Any]]:
             max_results=10,
             days=30  # Restrict to content published/updated in the last 30 days
         )
-        return response.get("results", [])
+        results = response.get("results", [])
+        
+        # DEBUG: Save raw Tavily results to file
+        try:
+            dump_path = os.path.join("data", "tavily_raw_dump.json")
+            existing_data = []
+            if os.path.exists(dump_path):
+                with open(dump_path, "r") as f:
+                    try:
+                        existing_data = json.load(f)
+                    except: pass
+            
+            # Timestamp the dump for clarity
+            dump_entry = {
+                "query": query,
+                "timestamp": datetime.now().isoformat(),
+                "results": results
+            }
+            existing_data.append(dump_entry)
+            
+            with open(dump_path, "w") as f:
+                json.dump(existing_data, f, indent=2)
+            logger.info(f"   💾 Saved raw search results to {dump_path}")
+        except Exception as e:
+            logger.warning(f"Failed to dump raw Tavily data: {e}")
+
+        return results
     except Exception as e:
         logger.error(f"Tavily search failed for query '{query}': {e}")
         return []
