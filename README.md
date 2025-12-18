@@ -143,6 +143,33 @@ You can now connect this RSS Agent to other Huginn agents, such as:
 3. Register it in `scrapers/__init__.py`
 4. Submit a PR
 
+## Operations Manual
+
+### Core Commands
+
+| Command | Description |
+|---------|-------------|
+| `python scheduler.py` | **Main Automation**: Runs Scrape -> AI Search -> Static Site -> Diges -> NocoDB Sync in a loop. |
+| `python scrape.py` | Runs all Scrapy spiders to collect events from configured sources. |
+| `python search_events.py` | Runs AI-powered search (Tavily + LLM) to find and verify events from the web. |
+| `python sync_nocodb.py` | Syncs local SQLite database events to NocoDB (De-duplicates by URL). |
+| `python send_digest.py` | Generates and sends the daily event digest to Telegram. |
+| `python generate_static.py` | Rebuilds the static HTML website (`docs/index.html`) from the database. |
+
+### Debugging & Specific Tasks
+
+- **Run Single Spider**:
+  ```bash
+  python -m scrapy crawl meetups
+  python -m scrapy crawl boston_chamber
+  ```
+
+- **Reset Database**:
+  Delete `data/events.db` to start fresh. The system will recreate it on next run.
+
+- **Check Logs**:
+  Logs are printed to console. `ansible.log` or `scheduler.log` may contain details if configured.
+
 ## License
 
 MIT
