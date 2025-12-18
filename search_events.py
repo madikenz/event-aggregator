@@ -88,7 +88,7 @@ def extract_events_with_cerebras(search_results: List[Dict[str, Any]]) -> List[D
     Focus on: Startups, Biotech, AI, Tech, Entrepreneurship in Boston.
     
     CRITICAL RULES:
-    1. EXTRACT REAL DATES. Do not hallucinate. If the snippet says "Dec 10", assume it is the upcoming Dec 10 relative to {today_str}.
+    1. EXTRACT REAL DATES. Do not hallucinate. If the snippet says "Dec 10", assume it is the upcoming Dec 10 relative to {today_str}. If "Dec 10" of the current year has passed, assume next year.
     2. IGNORE events that have already passed (before {today_str}).
     3. Return a JSON ARRAY of valid upcoming events.
     4. Format per event: {{"title": "...", "description": "...", "date": "YYYY-MM-DD", "location": "...", "url": "...", "relevance_score": 8}}
